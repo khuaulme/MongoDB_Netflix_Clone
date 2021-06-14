@@ -13,7 +13,7 @@ Giving your users the ability to find exactly what they are looking for in your 
 And along the way, we’ll discuss performance tips and caveats that you should keep in mind as you build out your searches. From finding your favorite movie to finding your favorite restaurant, look no further!
 
 In this workshop, we will take a very basic app showing only a search bar, and we will build up a full movie search engine Netflix clone. 
-https://github.com/khuaulme/MongoDB_Netflix_Clone/issues/1#issue-920845699
+![image](https://user-images.githubusercontent.com/15270412/121970570-71729a80-cd3c-11eb-8891-e92587fa8fcb.png)
 All you will need to complete this lab is:
 * Free MongoDB Atlas Cluster
 * Web browser
