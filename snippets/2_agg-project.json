@@ -1,0 +1,9 @@
+{
+  _id:0,
+  title:1,
+  year:1,
+  poster:1,
+  plot:1,
+  score: {$meta: 'searchScore'}
+}
+

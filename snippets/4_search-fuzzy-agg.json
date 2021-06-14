@@ -1,0 +1,8 @@
+{
+  text: {
+    query: 'Indiana Ones',
+    path: ['plot', 'fullplot', 'title'],
+    fuzzy:{}
+  }
+}
+

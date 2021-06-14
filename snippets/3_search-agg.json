@@ -1,0 +1,7 @@
+{
+  text: {
+    query: 'zombies',
+    path: ['plot', 'fullplot', 'title']
+  }
+}
+
