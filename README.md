@@ -20,6 +20,7 @@ All you will need to complete this lab is:
 * Some basic JavaScript knowledge
 * Willingness to get your hands-dirty and experiment
 
-For a detailed walk-through of the workshop complete with screenshots, check out: https://docs.google.com/document/d/19oMKK3lP3TUmT6_gFab81OoqLjfsA-g-PhI_w49MJ_k/edit?usp=sharing
+For a detailed walk-through of the workshop complete with screenshots, check out: [Delete Your Search History - Atlas Search Workshop
+](https://docs.google.com/document/d/19oMKK3lP3TUmT6_gFab81OoqLjfsA-g-PhI_w49MJ_k/edit?usp=sharing)
 
 
