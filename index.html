@@ -65,47 +65,65 @@
     </div>
 
     <script>
-      function searchMovies() {
+      async function searchMovies() {
         let searchString = document.getElementById("myInput").value;
         let txt = "";
 
         let webhook_url =
-          "https://webhooks.mongodb-realm.com/api/client/v2.0/app/ftsdemo-zcyez/service/movies/incoming_webhook/SearchWorkshopGetMoviesBasic";
+          "https://us-east-1.aws.webhooks.mongodb-realm.com/api/client/v2.0/app/netflixclone-hazaz/service/movies/incoming_webhook/getMovies";
 
         let url = webhook_url + "?arg=" + searchString;
         try {
-          fetch(url)
-            .then((response) => response.json())
-            .then((movies) => {
-              console.log(movies);
+          const response = await fetch(url);
+          const movies = await response.json();
 
-            //  txt += `<div class="grid-container">`;
+          console.log(movies);
 
-              movies.forEach((movie) => {
-                let title = movie.title;
-                let plot = movie.plot;
-                let year = movie.year["$numberInt"];
-                let score = movie.score["$numberDouble"].toString().slice(0, 5);
-                let poster = movie.poster ? movie.poster : "http://bit.ly/AtlasMoviePoster";
+          movies.forEach((movie) => {
+            let title = movie.title;
+            let plot = movie.plot;
+            let year = movie.year["$numberInt"];
+            let score = movie.score["$numberDouble"].toString().slice(0, 5);
+            let poster = movie.poster ? movie.poster : "https://search-demos.s3.us-east-2.amazonaws.com/PosterNotFound.png";
 
-                txt += ` <div class="column">
-                        <div class="MovieCard">
-                            
-                            <img class="img-poster" src=${poster} alt="poster" width="200">  
-                            <b><h3>${title}</h3></b>
-                            <h5><span class="color-gray">Score:</span> ${score} </h5>
-                            <h5><span class="color-gray">Year:</span> ${year}</h5>
-                            <p>${plot}</p>         
-                        </div>
+            let plotWithHighlights = buildPlotHighlights(movie.highlights);
+
+            txt += ` <div class="column">
+                    <div class="MovieCard">
+                        
+                        <img class="img-poster" src=${poster} alt="poster" width="200">  
+                        <b><h3>${title}</h3></b>
+                        <h5><span class="color-gray">Score:</span> ${score} </h5>
+                        <h5><span class="color-gray">Year:</span> ${year}</h5>
+                        <p>${plotWithHighlights}</p>         
                     </div>
-                    `;
-              });
+                </div>
+                `;
+          });
 
-              document.getElementById("results").innerHTML = txt;
-            });
+          document.getElementById("results").innerHTML = txt;
+        
         } catch (error) {
           console.log("Whoopsie!", error);
         }
+      }
+
+      function buildPlotHighlights(highlights){
+
+        console.log(highlights.length);
+        let highlightString="";
+
+        highlights.forEach(highlight =>{
+          console.log(highlight.texts);
+          let texts= highlight.texts;
+          texts.forEach(text =>{
+            if (text.type === 'hit')
+              highlightString += `<span style="color:red"> ${text.value} </span>`
+            else highlightString += text.value
+          });
+        });
+
+        return highlightString;
       }
     </script>
   </body>
