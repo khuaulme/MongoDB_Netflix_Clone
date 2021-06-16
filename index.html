@@ -89,8 +89,8 @@
         }
 
         try{
-          const response = await fetch(url);
-          const movies= await response.json();
+          const movies = await fetch(url)
+            .then(res =>res.json());
           
           console.log(movies);
           
