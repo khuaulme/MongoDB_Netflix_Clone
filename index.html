@@ -56,7 +56,7 @@
             </div>
           </div>
 
-          <div id="matches"></div>
+          <div id="autocomplete"></div>
         </div>
         <br />
       </div>
@@ -70,13 +70,11 @@
 
       let resultDisplay = document.getElementById("results");
       let search = document.getElementById("myInput");
-      const autoDisplay = document.getElementById("matches");
+      const autoDisplay = document.getElementById("autocomplete");
 
 
       async function searchMovies(path) {
-
-        console.log("PATH", path);
-        //let text = "Hello from MongoDB .Live!";
+       
         let text = "";
         let searchTerm = search.value;
         let url="";
@@ -89,9 +87,6 @@
         if (path ==="title"){
            url += "&path=title";
         }
-        
-        console.log (url);
-        
 
         try{
           const response = await fetch(url);
@@ -100,31 +95,29 @@
           console.log(movies);
           
           movies.forEach(movie =>{
-              const title = movie.title;
-              const plot = movie.plot;
-              let poster = movie.poster ? movie.poster : "http://bit.ly/AtlasMoviePoster";
-              let year = movie.year["$numberInt"];
-              let score = movie.score["$numberDouble"].toString().slice(0, 5);
-            //  let plotWithHighlights = buildPlotHighlights(movie.highlights);
-              
-
-                text += ` <div class="column">
-                        <div class="MovieCard">
-                            
-                            <img class="img-poster" src=${poster} alt="poster" width="200">  
-                            <b><h3>${title}</h3></b>
-                             <h5><span class="color-gray">Score:</span> ${score} </h5>
-                            <h5><span class="color-gray">Year:</span> ${year}</h5>
-                           
-                            <p>${plot}</p>         
-                        </div>
-                    </div>
-                    `;
-              });   
+            const title = movie.title;
+            const plot = movie.plot;
+            let poster = movie.poster ? movie.poster : "http://bit.ly/AtlasMoviePoster";
+            let year = movie.year["$numberInt"];
+            let score = movie.score["$numberDouble"].toString().slice(0, 5);
+            let plotWithHighlights = buildPlotHighlights(movie.highlights);
+            
+            text += ` 
+              <div class="column">
+                  <div class="MovieCard">
+                      <img class="img-poster" src=${poster} alt="poster" width="200">  
+                      <b><h3>${title}</h3></b>
+                      <h5><span class="color-gray">Score:</span> ${score} </h5>
+                      <h5><span class="color-gray">Year:</span> ${year}</h5>
+                      <p>${plotWithHighlights}</p>         
+                  </div>
+              </div>
+            `;
+          });   
 
 
-              resultDisplay.innerHTML = text;
-               autoDisplay.innerHTML='';
+          resultDisplay.innerHTML = text;
+          autoDisplay.innerHTML='';
           
         } catch (error) {
           console.log("Whoopsie!", error);
@@ -133,7 +126,6 @@
 
       function buildPlotHighlights(highlights){
 
-        console.log(highlights.length);
         let highlightString="";
 
         highlights.forEach(highlight =>{
@@ -144,59 +136,67 @@
               highlightString += `<span style="color:red"> ${text.value} </span>`
             else highlightString += text.value
           });
-
-
         });
      
       return highlightString;
-    }
+    }   
 
-   
+    async function searchMovieTitles() {
       
+      resultDisplay.innerHTML = '';
+      const searchTerm = search.value;
 
-      async function searchMovieTitles() {
-        resultDisplay.innerHTML = '';
-        
-        const searchTerm = search.value;
-        // const autoDisplay = document.getElementById("matches");
+      autoDisplay.innerHTML='';
 
-        autoDisplay.innerHTML='';
+      if (searchTerm.length < 4){
+        return;
+      } 
 
-        if (searchTerm.length < 4) return;
-        console.log("LENGTH", searchTerm.length);
-        
-        const response = await fetch(`https://us-east-1.aws.webhooks.mongodb-realm.com/api/client/v2.0/app/netflixclone-hazaz/service/movies/incoming_webhook/autocompleteTitles?arg=${searchTerm}`);
-        const titles = await response.json();
+      try {
+        const titles = await fetch(`https://us-east-1.aws.webhooks.mongodb-realm.com/api/client/v2.0/app/netflixclone-hazaz/service/movies/incoming_webhook/autocompleteTitles?arg=${searchTerm}`)
+          .then(res => res.json());
+      
         console.log(titles);
 
-        outputHTML(titles);  
-      }
-
-      function outputHTML(titles){
-       // const autoDisplay = document.getElementById("matches");
-        autoDisplay.innerHTML='';
         if (titles.length >0){
 
           titles.map(title =>{
             let div = document.createElement('div');
-            div.innerHTML=`<h4>${title.title}</h4><hr>`;
+            div.innerHTML=`<h2>${title.title}</h2><hr>`;
             div.addEventListener("click", ()=>fillMovieTitle(title.title));
             autoDisplay.appendChild(div);
-
           });      
-      }}
+        }
 
-      function fillMovieTitle(movieTitle){
-        console.log("MOVIETITLE", movieTitle);
-        
-        search.value = movieTitle;
-        autoDisplay.innerHTML='';
-        searchMovies("title");
+      } catch (error){
+        console.log("Whoopsie!", error);
+      } 
+      
+    }
 
-        console.log(movieTitle);
-      }
+    function outputHTML(titles){
+     
+      autoDisplay.innerHTML='';
+      if (titles.length >0){
 
-      search.addEventListener('input', searchMovieTitles);
+        titles.map(title =>{
+          let div = document.createElement('div');
+          div.innerHTML=`<h2>${title.title}</h2><hr>`;
+          div.addEventListener("click", ()=>fillMovieTitle(title.title));
+          autoDisplay.appendChild(div);
+
+        });      
+    }}
+
+    function fillMovieTitle(movieTitle){
+      console.log("MOVIETITLE", movieTitle);
+      
+      search.value = movieTitle;
+      autoDisplay.innerHTML='';
+      searchMovies("title");
+    }
+
+    search.addEventListener('input', searchMovieTitles);
     
 
 
