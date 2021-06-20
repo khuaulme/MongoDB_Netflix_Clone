@@ -9,9 +9,9 @@ async function searchMovies() {
 
       try{   
         const movies = await fetch(url)
-        .then(res =>res.json());
+          .then(res =>res.json());
       
-        console.log(movies)
+        console.log(movies);
 
         resultDisplay.innerHTML = text;     
             
@@ -19,4 +19,4 @@ async function searchMovies() {
       console.log("Whoopsie!", error);
       }
 
-    }
+}
