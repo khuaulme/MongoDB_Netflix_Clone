@@ -1,0 +1,1 @@
+search.addEventListener('input', searchMovieTitles);

@@ -1,0 +1,3 @@
+highlight: {
+  path: "plot"
+}
