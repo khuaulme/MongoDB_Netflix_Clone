@@ -59,7 +59,9 @@
       </div>
     </header>
 
-    <div class="grid-container" id="results">Movie Search Results</div>
+    <div class="grid-container" id="results">
+      Movie Search Results
+    </div>
 
     <script>
       let resultDisplay = document.getElementById("results");
@@ -76,54 +78,37 @@
 
         url = webhook + "?arg=" + searchTerm;
 
+        if (path === "title") {
+          url += "&path=title";
+        }
+
         try {
           const movies = await fetch(url).then((res) => res.json());
 
           console.log(movies);
-          if (movies.length === 0) {
-            let poster = "http://bit.ly/AtlasMoviePoster";
-            let title = "Sorry. No movies found.";
-            text = `<h1>Sorry. No movies found.</h1>`;
-            return;
-          } else {
-            movies.forEach((movie) => {
-              const title = movie.title;
-              const plot = movie.plot;
-              let poster = movie.poster
-                ? movie.poster
-                : "http://bit.ly/AtlasMoviePoster";
-              let year = movie.year["$numberInt"];
-              let score = movie.score["$numberDouble"].toString().slice(0, 5);
 
-              if (movie.highlights) {
-                let plotWithHighlights = buildPlotHighlights(movie.highlights);
+          movies.forEach((movie) => {
+            const title = movie.title;
+            const plot = movie.plot;
+            let poster = movie.poster
+              ? movie.poster
+              : "http://bit.ly/AtlasMoviePoster";
+            let year = movie.year["$numberInt"];
+            let score = movie.score["$numberDouble"].toString().slice(0, 5);
+            let plotWithHighlights = buildPlotHighlights(movie.highlights);
 
-                text += ` 
-                  <div class="column">
-                      <div class="MovieCard">
-                          <img class="img-poster" src=${poster} alt="poster" width="200">  
-                          <b><h3>${title}</h3></b>
-                          <h5><span class="color-gray">Score:</span> ${score} </h5>
-                          <h5><span class="color-gray">Year:</span> ${year}</h5>
-                          <p>${plotWithHighlights}</p>         
-                      </div>
+            text += ` 
+              <div class="column">
+                  <div class="MovieCard">
+                      <img class="img-poster" src=${poster} alt="poster" width="200">  
+                      <b><h3>${title}</h3></b>
+                      <h5><span class="color-gray">Score:</span> ${score} </h5>
+                      <h5><span class="color-gray">Year:</span> ${year}</h5>
+                      <p>${plotWithHighlights}</p>         
                   </div>
-                `;
-              } else {
-                text += ` 
-                  <div class="column">
-                      <div class="MovieCard">
-                          <img class="img-poster" src=${poster} alt="poster" width="200">  
-                          <b><h3>${title}</h3></b>
-                          <h5><span class="color-gray">Score:</span> ${score} </h5>
-                          <h5><span class="color-gray">Year:</span> ${year}</h5>
-                           <p>${plot}</p>      
-                      </div>
-                  </div>
-                `;
-              }
-            });
-          }
+              </div>
+            `;
+          });
 
           resultDisplay.innerHTML = text;
           autoDisplay.innerHTML = "";
