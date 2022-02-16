@@ -13,10 +13,7 @@
       integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
       crossorigin="anonymous"
     />
-    <link 
-      rel="stylesheet" 
-      type="text/css" 
-      href="public/netflixclone.css" >
+    <link rel="stylesheet" type="text/css" href="public/netflixclone.css" />
     <script src="https://kit.fontawesome.com/e1f93e03c9.js"></script>
     <title>NetflixClone</title>
   </head>
@@ -24,7 +21,7 @@
     <header>
       <div class="row">
         <div class="col-3 view overlay">
-          <img src="public/logo.svg" />  
+          <img src="public/logo.svg" />
         </div>
 
         <!-- Grid column -->
@@ -41,11 +38,11 @@
                   class="form-control"
                   placeholder="Atlas Search Movies..."
                   aria-label="Search"
-                  style="font-size: 2em; border: none"
+                  style="font-size: 2em; border: none;"
                 />
               </form>
             </div>
-            <div class="col-1" style="text-align: center">
+            <div class="col-1" style="text-align: center;">
               <span
                 ><i
                   class="fa fa-search"
@@ -62,144 +59,146 @@
       </div>
     </header>
 
-    <div class="grid-container" id="results">
-     Movie Search Results
-    </div>
+    <div class="grid-container" id="results">Movie Search Results</div>
 
     <script>
-
       let resultDisplay = document.getElementById("results");
       let search = document.getElementById("myInput");
       const autoDisplay = document.getElementById("autocomplete");
 
-
       async function searchMovies(path) {
-       
         let text = "";
         let searchTerm = search.value;
-        let url="";
+        let url = "";
 
+        const webhook =
+          "https://us-east-1.aws.data.mongodb-api.com/app/netflixclone-hazaz/endpoint/movies";
 
-        const webhook = "https://us-east-1.aws.data.mongodb-api.com/app/netflixclone-hazaz/endpoint/movies";
+        url = webhook + "?arg=" + searchTerm;
 
-        url = webhook +"?arg=" + searchTerm;
+        try {
+          const movies = await fetch(url).then((res) => res.json());
 
-        if (path ==="title"){
-           url += "&path=title";
-        }
-
-        try{
-          const movies = await fetch(url)
-            .then(res =>res.json());
-          
           console.log(movies);
-          
-          movies.forEach(movie =>{
-            const title = movie.title;
-            const plot = movie.plot;
-            let poster = movie.poster ? movie.poster : "http://bit.ly/AtlasMoviePoster";
-            let year = movie.year["$numberInt"];
-            let score = movie.score["$numberDouble"].toString().slice(0, 5);
-            let plotWithHighlights = buildPlotHighlights(movie.highlights);
-            
-            text += ` 
-              <div class="column">
-                  <div class="MovieCard">
-                      <img class="img-poster" src=${poster} alt="poster" width="200">  
-                      <b><h3>${title}</h3></b>
-                      <h5><span class="color-gray">Score:</span> ${score} </h5>
-                      <h5><span class="color-gray">Year:</span> ${year}</h5>
-                      <p>${plotWithHighlights}</p>         
-                  </div>
-              </div>
-            `;
-          });   
+          if (movies.length === 0) {
+            let poster = "http://bit.ly/AtlasMoviePoster";
+            let title = "Sorry. No movies found.";
+            text = `<h1>Sorry. No movies found.</h1>`;
+            return;
+          } else {
+            movies.forEach((movie) => {
+              const title = movie.title;
+              const plot = movie.plot;
+              let poster = movie.poster
+                ? movie.poster
+                : "http://bit.ly/AtlasMoviePoster";
+              let year = movie.year["$numberInt"];
+              let score = movie.score["$numberDouble"].toString().slice(0, 5);
 
+              if (movie.highlights) {
+                let plotWithHighlights = buildPlotHighlights(movie.highlights);
+
+                text += ` 
+                  <div class="column">
+                      <div class="MovieCard">
+                          <img class="img-poster" src=${poster} alt="poster" width="200">  
+                          <b><h3>${title}</h3></b>
+                          <h5><span class="color-gray">Score:</span> ${score} </h5>
+                          <h5><span class="color-gray">Year:</span> ${year}</h5>
+                          <p>${plotWithHighlights}</p>         
+                      </div>
+                  </div>
+                `;
+              } else {
+                text += ` 
+                  <div class="column">
+                      <div class="MovieCard">
+                          <img class="img-poster" src=${poster} alt="poster" width="200">  
+                          <b><h3>${title}</h3></b>
+                          <h5><span class="color-gray">Score:</span> ${score} </h5>
+                          <h5><span class="color-gray">Year:</span> ${year}</h5>
+                           <p>${plot}</p>      
+                      </div>
+                  </div>
+                `;
+              }
+            });
+          }
 
           resultDisplay.innerHTML = text;
-          autoDisplay.innerHTML='';
-          
+          autoDisplay.innerHTML = "";
         } catch (error) {
           console.log("Whoopsie!", error);
         }
       }
 
-      function buildPlotHighlights(highlights){
+      function buildPlotHighlights(highlights) {
+        let highlightString = "";
 
-        let highlightString="";
-
-        highlights.forEach(highlight =>{
+        highlights.forEach((highlight) => {
           console.log(highlight.texts);
-          let texts= highlight.texts;
-          texts.forEach(text =>{
-            if (text.type === 'hit')
-              highlightString += `<span style="color:red"> ${text.value} </span>`
-            else highlightString += text.value
+          let texts = highlight.texts;
+          texts.forEach((text) => {
+            if (text.type === "hit")
+              highlightString += `<span style="color:red"> ${text.value} </span>`;
+            else highlightString += text.value;
           });
         });
-     
-      return highlightString;
-    }   
 
-    async function searchMovieTitles() {
-      
-      resultDisplay.innerHTML = '';
-      const searchTerm = search.value;
+        return highlightString;
+      }
 
-      autoDisplay.innerHTML='';
+      async function searchMovieTitles() {
+        resultDisplay.innerHTML = "";
+        const searchTerm = search.value;
 
-      if (searchTerm.length < 4){
-        return;
-      } 
+        autoDisplay.innerHTML = "";
 
-      try {
-        const titles = await fetch(`https://us-east-1.aws.webhooks.mongodb-realm.com/api/client/v2.0/app/netflixclone-hazaz/service/movies/incoming_webhook/autocompleteTitles?arg=${searchTerm}`)
-          .then(res => res.json());
-      
-        console.log(titles);
-
-        if (titles.length >0){
-
-          titles.map(title =>{
-            let div = document.createElement('div');
-            div.innerHTML=`<h2>${title.title}</h2><hr>`;
-            div.addEventListener("click", ()=>fillMovieTitle(title.title));
-            autoDisplay.appendChild(div);
-          });      
+        if (searchTerm.length < 4) {
+          return;
         }
 
-      } catch (error){
-        console.log("Whoopsie!", error);
-      } 
-      
-    }
+        try {
+          const titles = await fetch(
+            `https://us-east-1.aws.data.mongodb-api.com/app/netflixclone-hazaz/endpoint/movieTitles?arg=${searchTerm}`
+          ).then((res) => res.json());
 
-    function outputHTML(titles){
-     
-      autoDisplay.innerHTML='';
-      if (titles.length >0){
+          console.log(titles);
 
-        titles.map(title =>{
-          let div = document.createElement('div');
-          div.innerHTML=`<h2>${title.title}</h2><hr>`;
-          div.addEventListener("click", ()=>fillMovieTitle(title.title));
-          autoDisplay.appendChild(div);
+          if (titles.length > 0) {
+            titles.map((title) => {
+              let div = document.createElement("div");
+              div.innerHTML = `<h2>${title.title}</h2><hr>`;
+              div.addEventListener("click", () => fillMovieTitle(title.title));
+              autoDisplay.appendChild(div);
+            });
+          }
+        } catch (error) {
+          console.log("Whoopsie!", error);
+        }
+      }
 
-        });      
-    }}
+      function outputHTML(titles) {
+        autoDisplay.innerHTML = "";
+        if (titles.length > 0) {
+          titles.map((title) => {
+            let div = document.createElement("div");
+            div.innerHTML = `<h2>${title.title}</h2><hr>`;
+            div.addEventListener("click", () => fillMovieTitle(title.title));
+            autoDisplay.appendChild(div);
+          });
+        }
+      }
 
-    function fillMovieTitle(movieTitle){
-      console.log("MOVIETITLE", movieTitle);
-      
-      search.value = movieTitle;
-      autoDisplay.innerHTML='';
-      searchMovies("title");
-    }
+      function fillMovieTitle(movieTitle) {
+        console.log("MOVIETITLE", movieTitle);
 
-    search.addEventListener('input', searchMovieTitles);
-    
+        search.value = movieTitle;
+        autoDisplay.innerHTML = "";
+        searchMovies("title");
+      }
 
-
+      search.addEventListener("input", searchMovieTitles);
     </script>
   </body>
 </html>
