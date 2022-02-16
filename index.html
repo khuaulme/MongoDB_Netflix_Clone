@@ -1,58 +1,28 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport"
-    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
-  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
-  <style>
-    header {
-      background-color: transparent;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      padding-left: 100px;
-      padding-right: 100px;
-    }
-    .fa-search {
-      color: #0ad05b;
-      padding-top: 14px;
-      font-size:32px;
-      outline: none;
-    }
-    #box {
-      border: 2px solid black;
-      margin-left: 20px;
-      margin-top: 110px;
-    }
-    #results {
-      margin-left: 80px;
-      margin-right: 80px;
-    }
-    .form-control {
-      background: transparent;
-      color: black;
-      /*color: white !important;*/
-    }
-    .form-control:focus {
-      border-color: inherit;
-      -webkit-box-shadow: none;
-      box-shadow: none;
-      background: transparent;
-    } 
-  </style>
-  <script src="https://kit.fontawesome.com/e1f93e03c9.js"></script>
-  <title>NetflixClone</title>
-</head>
-
-<body>
-  <header>
-    <div class="row">
-      <div class="col-3 view overlay">
-        <img src="public/logo.svg" />
-      </div>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" type="text/css" href="public/netflixclone.css" />
+    <script src="https://kit.fontawesome.com/e1f93e03c9.js"></script>
+    <title>NetflixClone</title>
+  </head>
+  <body>
+    <header>
+      <div class="row">
+        <div class="col-3 view overlay">
+          <img src="public/logo.svg" />
+        </div>
 
         <!-- Grid column -->
 
@@ -60,12 +30,26 @@
           <div class="row" id="box">
             <div class="col-11">
               <form onsubmit="searchMovies()" action="javascript:">
-                <input type="text" onsubmit="searchMovies()" autocomplete="off" id="myInput" class="form-control"
-                  placeholder="Atlas Search Movies..." aria-label="Search" style="font-size: 2em; border: none" />
+                <input
+                  type="text"
+                  onsubmit="searchMovies()"
+                  autocomplete="off"
+                  id="myInput"
+                  class="form-control"
+                  placeholder="Atlas Search Movies..."
+                  aria-label="Search"
+                  style="font-size: 2em; border: none;"
+                />
               </form>
             </div>
-            <div class="col-1" style="text-align: center">
-              <span><i class="fa fa-search" aria-hidden="true" onclick="searchMovies()"></i></span>
+            <div class="col-1" style="text-align: center;">
+              <span
+                ><i
+                  class="fa fa-search"
+                  aria-hidden="true"
+                  onclick="searchMovies()"
+                ></i
+              ></span>
             </div>
           </div>
 
@@ -73,25 +57,133 @@
         </div>
         <br />
       </div>
-  </header>
+    </header>
 
-  <div class="grid-container" id="results">
-    Movie Search Results
-  </div>
+    <div class="grid-container" id="results">
+      Movie Search Results
+    </div>
 
-  <script>
-    let resultDisplay = document.getElementById("results");
-    let search = document.getElementById("myInput");
-    let autoDisplay = document.getElementById("autocomplete");
+    <script>
+      let resultDisplay = document.getElementById("results");
+      let search = document.getElementById("myInput");
+      const autoDisplay = document.getElementById("autocomplete");
 
-    function searchMovies() {
+      async function searchMovies(path) {
+        let text = "";
+        let searchTerm = search.value;
+        let url = "";
 
-      let text = "Welcome to Delete Your Search History at MongoDB .Live!";
+        const webhook =
+          "https://us-east-1.aws.data.mongodb-api.com/app/netflixclone-hazaz/endpoint/movies";
 
+        url = webhook + "?arg=" + searchTerm;
 
-     resultDisplay.innerHTML = text;
-    }
-  </script>
-</body>
+        if (path === "title") {
+          url += "&path=title";
+        }
 
+        try {
+          const movies = await fetch(url).then((res) => res.json());
+
+          console.log(movies);
+
+          movies.forEach((movie) => {
+            const title = movie.title;
+            const plot = movie.plot;
+            let poster = movie.poster
+              ? movie.poster
+              : "http://bit.ly/AtlasMoviePoster";
+            let year = movie.year["$numberInt"];
+            let score = movie.score["$numberDouble"].toString().slice(0, 5);
+            let plotWithHighlights = buildPlotHighlights(movie.highlights);
+
+            text += ` 
+              <div class="column">
+                  <div class="MovieCard">
+                      <img class="img-poster" src=${poster} alt="poster" width="200">  
+                      <b><h3>${title}</h3></b>
+                      <h5><span class="color-gray">Score:</span> ${score} </h5>
+                      <h5><span class="color-gray">Year:</span> ${year}</h5>
+                      <p>${plotWithHighlights}</p>         
+                  </div>
+              </div>
+            `;
+          });
+
+          resultDisplay.innerHTML = text;
+          autoDisplay.innerHTML = "";
+        } catch (error) {
+          console.log("Whoopsie!", error);
+        }
+      }
+
+      function buildPlotHighlights(highlights) {
+        let highlightString = "";
+
+        highlights.forEach((highlight) => {
+          console.log(highlight.texts);
+          let texts = highlight.texts;
+          texts.forEach((text) => {
+            if (text.type === "hit")
+              highlightString += `<span style="color:red"> ${text.value} </span>`;
+            else highlightString += text.value;
+          });
+        });
+
+        return highlightString;
+      }
+
+      async function searchMovieTitles() {
+        resultDisplay.innerHTML = "";
+        const searchTerm = search.value;
+
+        autoDisplay.innerHTML = "";
+
+        if (searchTerm.length < 4) {
+          return;
+        }
+
+        try {
+          const titles = await fetch(
+            `https://us-east-1.aws.data.mongodb-api.com/app/netflixclone-hazaz/endpoint/movieTitles?arg=${searchTerm}`
+          ).then((res) => res.json());
+
+          console.log(titles);
+
+          if (titles.length > 0) {
+            titles.map((title) => {
+              let div = document.createElement("div");
+              div.innerHTML = `<h2>${title.title}</h2><hr>`;
+              div.addEventListener("click", () => fillMovieTitle(title.title));
+              autoDisplay.appendChild(div);
+            });
+          }
+        } catch (error) {
+          console.log("Whoopsie!", error);
+        }
+      }
+
+      function outputHTML(titles) {
+        autoDisplay.innerHTML = "";
+        if (titles.length > 0) {
+          titles.map((title) => {
+            let div = document.createElement("div");
+            div.innerHTML = `<h2>${title.title}</h2><hr>`;
+            div.addEventListener("click", () => fillMovieTitle(title.title));
+            autoDisplay.appendChild(div);
+          });
+        }
+      }
+
+      function fillMovieTitle(movieTitle) {
+        console.log("MOVIETITLE", movieTitle);
+
+        search.value = movieTitle;
+        autoDisplay.innerHTML = "";
+        searchMovies("title");
+      }
+
+      search.addEventListener("input", searchMovieTitles);
+    </script>
+  </body>
 </html>
